@@ -7,14 +7,12 @@ def pdf_to_text(pdf_file):
     """Converts PDF file content to text using PyPDF2, excluding lines containing 'DocuSign' or version numbers."""
     text = ""
     reader = PdfReader(pdf_file)
-    # Define the regular expression for version numbers inside the function
     version_pattern = re.compile(r'\bv?\d+(\.\d+)+\b')  # Regular expression to match version numbers (e.g., 1.0.0, v2.1.3)
     for page in reader.pages:
         page_text = page.extract_text() if page.extract_text() else ""
-        # Filter out lines that contain 'DocuSign', ignoring case, or match the version number pattern
         filtered_text = "\n".join(line for line in page_text.splitlines() if "docusign" not in line.lower() and not version_pattern.search(line))
         text += filtered_text + "\n"
-    return text.strip()  # Strip to remove leading/trailing whitespace
+    return text.strip()
 
 def highlight_differences(text1, text2):
     """Generates HTML to display differing lines from two texts, highlighting differences and including line numbers."""
@@ -39,19 +37,28 @@ def highlight_differences(text1, text2):
         diff_html = '<table style="width:100%;">' + diff_html + '</table>'
     return diff_html, differences_found
 
-st.title('Jigo AI - contract comparison')
+st.title('Unwanted change checker')
 
-st.write("Upload or drag and drop two PDF files below to compare them. Lines with 'DocuSign' and version numbers are ignored in the comparison.")
+st.write("Intended to be used to compare two contracts that should be identical. Lines with 'DocuSign' and version numbers are ignored in the comparison.")
+
+# Use session state to manage the unique keys for file uploaders
+if 'upload_key' not in st.session_state:
+    st.session_state.upload_key = 0
+
+# Add a refresh button
+if st.button('Refresh App'):
+    # Increment the key to reset the uploaders
+    st.session_state.upload_key += 1
 
 col1, col2 = st.columns(2)
 
 with col1:
     st.write("PDF 1:")
-    pdf1 = st.file_uploader("Upload PDF 1", type=['pdf'], key="pdf1")
+    pdf1 = st.file_uploader("Upload PDF 1", type=['pdf'], key=f"pdf1_{st.session_state.upload_key}")
 
 with col2:
     st.write("PDF 2:")
-    pdf2 = st.file_uploader("Upload PDF 2", type=['pdf'], key="pdf2")
+    pdf2 = st.file_uploader("Upload PDF 2", type=['pdf'], key=f"pdf2_{st.session_state.upload_key}")
 
 if pdf1 and pdf2:
     pdf1_bytes = io.BytesIO(pdf1.getvalue())
@@ -66,6 +73,5 @@ if pdf1 and pdf2:
     else:
         st.write("Differences Found (excluding 'DocuSign' and version numbers):")
         st.markdown(diff_html, unsafe_allow_html=True)
-
    
 
