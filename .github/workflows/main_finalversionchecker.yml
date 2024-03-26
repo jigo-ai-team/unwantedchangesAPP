@@ -64,4 +64,4 @@ jobs:
         with:
           app-name: 'finalversionchecker'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4EDE63F7AE8F40579AFA4C2F5F1D2CC9 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A5248326B00B4480AE4B0139AC821969 }}
